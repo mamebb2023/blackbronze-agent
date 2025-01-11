@@ -1,0 +1,11 @@
+[Unit]
+Description=BlackBronze Agent Service
+After=network.target
+
+[Service]
+ExecStart=/path/to/bb-agent/bin/python /path/to/bb-agent/src/agent.py
+WorkingDirectory=/path/to/bb-agent/src
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

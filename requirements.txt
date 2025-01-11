@@ -1,0 +1,4 @@
+# requirements for the agent
+
+requests
+psutil
