@@ -1,4 +1,4 @@
-# BlackBronze Agent
+# Agent BlackBronze
 
 This agent collects system metrics and sends them to the BlackBronze.
 
