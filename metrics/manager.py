@@ -1,5 +1,5 @@
 # Metrics manager
-import requests
+import aiohttp
 from datetime import datetime
 
 from utils.logger import log_error
@@ -21,18 +21,20 @@ def get_system_metrics():
     return metrics
 
 
-def send_data(metrics, api_key, agent_id):
-    """Send the collected metrics to the backend."""
+async def send_data(metrics, api_key, agent_id):
+    """Send metrics data to website back-end."""
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-    # Attach the agent ID to the metrics
     metrics["agent_id"] = agent_id
 
     try:
-        response = requests.post(
-            f"{BACKEND_URL}/api/agent/metrics", json=metrics, headers=headers
-        )
-        response.raise_for_status()
-        print("Data sent successfully:", response.json())
-    except requests.exceptions.RequestException as e:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{BACKEND_URL}/api/agent/metrics", json=metrics, headers=headers
+            ) as response:
+                print("Backend Response:", response.status, await response.text())
+                response.raise_for_status()
+                print("Data sent successfully:", await response.json())
+    except aiohttp.ClientError as e:
         log_error(f"Failed to send data: {e}")
+        raise
