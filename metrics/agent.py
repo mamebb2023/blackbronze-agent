@@ -3,7 +3,6 @@
 import time
 import asyncio
 
-from collectors.info import get_system_info
 from utils.helpers import get_or_create_agent_id, register_agent
 from cli import parse_arguments
 from manager import get_system_metrics, send_data
@@ -16,11 +15,14 @@ async def main(api_key):
     # Register the agent when start before running
     await register_agent(api_key)
 
-    while True:
-        metrics = get_system_metrics()
-        agent_id = await get_or_create_agent_id()
-        await send_data(metrics, api_key, agent_id)
-        time.sleep(60)
+    try:
+        while True:
+            metrics = get_system_metrics()
+            agent_id = await get_or_create_agent_id()
+            await send_data(metrics, api_key, agent_id)
+            time.sleep(60)
+    except KeyboardInterrupt:
+        print("\033[91mKeyBoardInterrupt: BlackBronze Agent is stopped.\033[0m")
 
 
 if __name__ == "__main__":

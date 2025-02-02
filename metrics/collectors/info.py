@@ -22,3 +22,5 @@ def get_system_info():
         "public_ip": public_ip,
     }
     return info
+
+
