@@ -1,6 +1,4 @@
-# Main agent script that runs on the client machine to collect system metrics and send them to the server.
-
-import time
+# import time
 import asyncio
 
 from utils.helpers import get_or_create_agent_id, register_agent
@@ -10,21 +8,32 @@ from manager import get_system_metrics, send_data
 
 async def main(api_key):
     """Main agent function."""
-    print("BlackBronze Agent is running...")
+    print("\033[92mBlackBronze Agent is running...\033[0m")
 
     # Register the agent when start before running
     await register_agent(api_key)
 
-    try:
-        while True:
+    while True:
+        try:
             metrics = get_system_metrics()
             agent_id = await get_or_create_agent_id()
-            await send_data(metrics, api_key, agent_id)
-            time.sleep(60)
-    except KeyboardInterrupt:
-        print("\033[91mKeyBoardInterrupt: BlackBronze Agent is stopped.\033[0m")
+            await send_data(metrics, api_key, agent_id, "online")
+            await asyncio.sleep(15)
+        except Exception as e:
+            metrics = get_system_metrics()
+            agent_id = get_or_create_agent_id()
+            asyncio.run(send_data(metrics, api_key, agent_id, "offline"))
+            print(f"\033[91mError occurred: {e}\033[0m")
 
 
 if __name__ == "__main__":
     api_key = parse_arguments()
-    asyncio.run(main(api_key))
+
+    try:
+        asyncio.run(main(api_key))
+    except KeyboardInterrupt:
+        metrics = get_system_metrics()
+        agent_id = asyncio.run(get_or_create_agent_id())
+        asyncio.run(send_data(metrics, api_key, agent_id, "offline"))
+
+        print("\033[91mKeyBoardInterrupt: BlackBronze Agent is stopped.\033[0m")

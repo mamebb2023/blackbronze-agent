@@ -11,11 +11,18 @@ from config.config import BACKEND_URL, AGENT_CONFIG_FILE
 
 async def get_or_create_agent_id():
     """Get or create an agent ID."""
+    config_dir = os.path.dirname(AGENT_CONFIG_FILE)
+
+    # Ensure the directory exists
+    os.makedirs(config_dir, exist_ok=True)
+
+    # Check if the file exists and read it
     if os.path.exists(AGENT_CONFIG_FILE):
         async with aiofiles.open(AGENT_CONFIG_FILE, "r") as f:
             config = json.loads(await f.read())
             return config.get("agent_id")
 
+    # If the file doesn't exist, generate a new agent_id
     agent_id = str(uuid.uuid4())
     async with aiofiles.open(AGENT_CONFIG_FILE, "w") as f:
         await f.write(json.dumps({"agent_id": agent_id}))

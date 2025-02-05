@@ -21,11 +21,12 @@ def get_system_metrics():
     return metrics
 
 
-async def send_data(metrics, api_key, agent_id):
+async def send_data(metrics, api_key, agent_id, status):
     """Send metrics data to website back-end."""
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
     metrics["agent_id"] = agent_id
+    metrics["status"] = status
 
     try:
         async with aiohttp.ClientSession() as session:
