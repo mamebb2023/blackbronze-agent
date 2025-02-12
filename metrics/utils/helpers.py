@@ -39,7 +39,9 @@ async def register_agent(api_key):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {"agent_id": agent_id, "api_key": api_key, "device_info": device_info}
 
-    print("Registering Agent with Payload:", payload)
+    print("Registering Agent with Payload:")
+    for key, value in payload.items():
+        print(f"{key}: {value}")
 
     try:
         async with aiohttp.ClientSession() as session:

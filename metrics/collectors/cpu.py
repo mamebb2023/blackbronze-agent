@@ -8,7 +8,7 @@ def cpu_info():
         "cpu_name": platform.processor(),
         "cpu_physical_cores": psutil.cpu_count(logical=False),
         "cpu_logical_cores": psutil.cpu_count(logical=True),
-        "cpu_architecture": platform.architecture(),
+        "cpu_architecture": " ".join(platform.architecture()),
     }
 
     if psutil.cpu_freq():

@@ -1,14 +1,11 @@
 import platform
 import socket
-import requests
+
+from collectors import cpu, memory, disk, network
 
 
 def get_system_info():
     """Collect system information."""
-    try:
-        public_ip = requests.get("https://api.ipify.org").text
-    except requests.RequestException:
-        public_ip = "Unable to get public IP"
 
     info = {
         "node_name": platform.node(),
@@ -17,8 +14,10 @@ def get_system_info():
         "release": platform.release(),
         "version": platform.version(),
         "machine": platform.machine(),
-        "processor": platform.processor(),
-        "local_ip": socket.gethostbyname(socket.gethostname()),
-        "public_ip": public_ip,
+        "cpu": cpu.cpu_info(),
+        "memory": memory.memory_info(),
+        "disk": disk.disk_info(),
+        "network": network.network_info(),
     }
+
     return info

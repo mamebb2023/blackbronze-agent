@@ -1,34 +1,41 @@
 import psutil
-
-# import wmi
+import wmi
 
 
 def memory_info():
     """Returns static memory info (e.g., total, available, etc.)."""
     virtual_mem = psutil.virtual_memory()
 
-    # c = wmi.WMI()
-    # for memory in c.Win32_PhysicalMemory():
-    #     print(f"Memory Manufacturer: {memory.Manufacturer}")
-    #     print(f"Memory Type: {memory.MemoryType}")
-
-    # # Safely handle buffers and cached
     info = {
-        "total": virtual_mem.total,  # Static: Total physical memory
-        # "slots": [],  # Static: Memory type
+        "total": virtual_mem.total,
     }
 
-    # Static: Memory shared between processes
     if hasattr(virtual_mem, "shared"):
         info["shared"] = virtual_mem.shared
 
-    # Static: Cache used for block device I/O
     if hasattr(virtual_mem, "buffers"):
         info["buffers"] = virtual_mem.buffers
 
-    # Static: Memory used by the page cache
     if hasattr(virtual_mem, "cached"):
         info["cached"] = virtual_mem.cached
+
+    try:
+        c = wmi.WMI()
+        physical_memory_arrays = c.Win32_PhysicalMemoryArray()
+
+        if physical_memory_arrays:
+            slots = 0
+            physical_memories = c.Win32_PhysicalMemory()
+            for memory in physical_memories:
+                if memory.BankLabel:
+                    slots += 1
+            info["slots"] = slots  # Add the slot count to the info dictionary
+        else:
+            info["slots"] = "unknown"  # No physical memory arrays found
+
+    except Exception as e:
+        print(f"Error getting RAM slots: {e}")
+        info["slots"] = "unknown"
 
     return info
 
@@ -66,8 +73,3 @@ def memory_metrics():
 #         "sin": swap_mem.sin,  # Dynamic: Bytes swapped in from disk
 #         "sout": swap_mem.sout,  # Dynamic: Bytes swapped out to disk
 #     }
-
-
-if __name__ == "__main__":
-    print("Virtual Memory Info (Static):", memory_info())
-    print("Virtual Memory Metrics (Dynamic):", memory_metrics())

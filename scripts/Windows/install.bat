@@ -48,10 +48,8 @@ if "%1"=="" (
 )
 
 python .\metrics\agent.py --BB_API_KEY %1
-
-:: Check if the command succeeded
 if %errorlevel% equ 0 (
-  echo BB Agent is running
+  echo Working
 ) else (
   echo BB Agent failed to start
 )

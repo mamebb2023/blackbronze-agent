@@ -12,10 +12,10 @@ def get_system_metrics():
 
     metrics = {
         "timestamp": datetime.now().isoformat(),
-        "cpu_usage": cpu.cpu_usage(),
-        "memory_usage": memory.memory_usage(),
-        "disk_usage": disk.disk_usage(),
-        "network_usage": network.network_usage(),
+        "cpu": cpu.cpu_metrics(),
+        "memory": memory.memory_metrics(),
+        "disk": disk.disk_metrics(),
+        "network": network.network_metrics(),
     }
 
     return metrics
