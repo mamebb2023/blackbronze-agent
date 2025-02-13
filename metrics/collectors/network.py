@@ -14,7 +14,7 @@ def network_info():
                 mac_address = addr.address
 
         mtu = psutil.net_if_stats().get(interface, None)
-        mtu_value = mtu.mtu if mtu else None
+        mtu_value = mtu.mtu if mtu else "None"
 
         info["network_interfaces"].append(
             {"interface": interface, "mac_address": mac_address, "mtu": mtu_value}

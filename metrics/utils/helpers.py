@@ -39,9 +39,12 @@ async def register_agent(api_key):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {"agent_id": agent_id, "api_key": api_key, "device_info": device_info}
 
-    print("Registering Agent with Payload:")
-    for key, value in payload.items():
-        print(f"{key}: {value}")
+    # for key, value in payload.items():
+    #     if key == "device_info":
+    #         for key, value in value.items():
+    #             print(f"{key}: {value}\n")
+    #     else:
+    #         print(f"{key}: {value}\n")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -52,5 +55,9 @@ async def register_agent(api_key):
                 response.raise_for_status()
                 print("Agent registered successfully:", await response.json())
     except aiohttp.ClientError as e:
-        log_error(f"Failed to register agent: {e}")
+        log_error(f"Failed to register agent: Client Error")
+        raise
+
+    except aiohttp.ClientConnectorDNSError as e:
+        log_error(f"Failed to register agent: Connection Error")
         raise
