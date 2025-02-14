@@ -37,4 +37,3 @@ if __name__ == "__main__":
         asyncio.run(send_data(metrics, api_key, agent_id, "offline"))
 
         print("\033[91mKeyBoardInterrupt: BlackBronze Agent is stopped.\033[0m")
-        exit(1)
