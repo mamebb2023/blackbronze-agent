@@ -24,44 +24,61 @@ def network_info():
 
 
 def network_metrics():
-    """Returns network I/O statistics since boot."""
+    """Returns active network interfaces with their stats."""
     io_stats = psutil.net_io_counters(pernic=True)
     interfaces = psutil.net_if_addrs()
 
-    interface_info = [
-        {
-            "interface": iface,
-            "ip_address": snic.address,
-            "netmask": snic.netmask,
-            "broadcast": snic.broadcast,
-        }
-        for iface, snics in interfaces.items()
-        for snic in snics
-        if snic.family == socket.AF_INET
-    ]
+    active_interfaces = []
 
-    io_data = {
-        nic: {
-            "bytes_sent": s.bytes_sent,
-            "bytes_recv": s.bytes_recv,
-            "packets_sent": s.packets_sent,
-            "packets_recv": s.packets_recv,
-            "errin": s.errin,
-            "errout": s.errout,
-            "dropin": s.dropin,
-            "dropout": s.dropout,
-        }
-        for nic, s in io_stats.items()
-    }
+    for nic, s in io_stats.items():
+        total_bytes = s.bytes_sent + s.bytes_recv
+        if total_bytes > 0:  # Only consider interfaces with activity
+            interface_info = {"interface": nic}
 
+            # Try to find the IP details for this interface
+
+            for iface, snics in interfaces.items():
+                if iface == nic:
+                    # for snic in snics:
+                    # if snic.family in [socket.AF_INET, socket.AF_INET6]:  # Include both IPv4 and IPv6
+                    #     interface_info.update({
+                    #         "ip_address": snic.address,
+                    #         "netmask": snic.netmask,
+                    #         "broadcast": snic.broadcast if hasattr(snic, "broadcast") else None
+                    #     })
+                    #     break
+                    for snic in snics:
+                        if snic.family == socket.AF_INET:  # IPv4 only
+                            interface_info.update(
+                                {
+                                    "ip_address": snic.address,
+                                    "netmask": snic.netmask,
+                                    "broadcast": snic.broadcast,
+                                }
+                            )
+                            break
+
+            # Add network usage stats
+            interface_info.update(
+                {
+                    "total_bytes": total_bytes,
+                    "bytes_sent": s.bytes_sent,
+                    "bytes_recv": s.bytes_recv,
+                    "packets_sent": s.packets_sent,
+                    "packets_recv": s.packets_recv,
+                    "errin": s.errin,
+                    "errout": s.errout,
+                    "dropin": s.dropin,
+                    "dropout": s.dropout,
+                }
+            )
+
+            active_interfaces.append(interface_info)
+
+    # Get public IP (handle request failure)
     try:
-        public_ip = requests.get("https://api.ipify.org").text
+        public_ip = requests.get("https://api.ipify.org", timeout=5).text
     except requests.RequestException:
         public_ip = "unknown"
 
-    return {
-        "local_ip": socket.gethostbyname(socket.gethostname()),
-        "public_ip": public_ip,
-        "network_interfaces": interface_info,
-        "network_io": io_data,
-    }
+    return {"public_ip": public_ip, "active_interfaces": active_interfaces}
