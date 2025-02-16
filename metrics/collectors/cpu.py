@@ -40,7 +40,6 @@ def cpu_metrics():
     """Returns dynamic CPU usage metrics."""
     usage = {
         "cpu_percent": psutil.cpu_percent(interval=1),
-        "cpu_freq": (psutil.cpu_freq().current if psutil.cpu_freq() else None),
         "cpu_times": {
             "user": psutil.cpu_times().user,
             "system": psutil.cpu_times().system,

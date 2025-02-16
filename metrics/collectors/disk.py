@@ -2,29 +2,32 @@ import psutil
 
 
 def disk_info():
-    """Returns disk usage statistics for all mounted partitions."""
-    info = {
-        "disk_total_space": psutil.disk_usage("/").total,
-        "disk_partitions": [],
-    }
+    """Returns disk usage statistics partitions."""
+    total_disk_space = 0
+    partitions_info = []
 
     for partition in psutil.disk_partitions():
+
         try:
             usage = psutil.disk_usage(partition.mountpoint)
-            # Append partition information to the "partitions" list
-            info["disk_partitions"].append(
+            total_disk_space += usage.total  # Sum only fixed partitions
+
+            partitions_info.append(
                 {
                     "device": partition.device,
                     "mountpoint": partition.mountpoint,
-                    "space": usage.total,
+                    "total_space": usage.total,
                     "fstype": partition.fstype,
+                    "opts": partition.opts,
                 }
             )
         except PermissionError:
-            # Skip partitions that can't be accessed
-            continue
+            continue  # Skip partitions that can't be accessed
 
-    return info
+    return {
+        "disk_total_space": total_disk_space,  # Corrected total space
+        "disk_partitions": partitions_info,
+    }
 
 
 def disk_metrics():
