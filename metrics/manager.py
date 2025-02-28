@@ -4,7 +4,7 @@ from datetime import datetime
 
 from utils.logger import log_error
 from config.config import BACKEND_URL
-from collectors import cpu, disk, memory, network
+from collectors import cpu, disk, memory, network, services
 
 
 def get_system_metrics():
@@ -16,6 +16,7 @@ def get_system_metrics():
         "memory": memory.memory_metrics(),
         "disk": disk.disk_metrics(),
         "network": network.network_metrics(),
+        "services": services.running_services(),
     }
 
     return metrics
