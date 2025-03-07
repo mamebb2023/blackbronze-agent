@@ -37,32 +37,44 @@ def cpu_temperature():
 
 
 def cpu_metrics():
-    """Returns dynamic CPU usage metrics."""
-    usage = {
-        "cpu_percent": psutil.cpu_percent(interval=1),
-        "cpu_times": {
-            "user": psutil.cpu_times().user,
-            "system": psutil.cpu_times().system,
-            "idle": psutil.cpu_times().idle,
+    """Returns optimized and detailed CPU usage metrics."""
+
+    # Get overall CPU usage
+    cpu_percent = psutil.cpu_percent(interval=1)
+    cpu_times = psutil.cpu_times_percent(interval=1)
+
+    # Prepare CPU usage details
+    metrics = {
+        "cpu_percent": cpu_percent,  # Overall CPU usage
+        "cpu_times_percent": {
+            "user": cpu_times.user,
+            "system": cpu_times.system,
+            "idle": cpu_times.idle,
         },
-        "cpu_times_percent": psutil.cpu_times_percent(interval=1),
     }
-    cpu_temp = cpu_temperature()
 
-    if not cpu_temp["error"]:
-        usage["cpu_temperature"] = cpu_temp["cpu_temperature"]
+    # Add extra details if running on Linux
+    # if psutil.LINUX:
+    #     metrics["cpu_times_percent"].update(
+    #         {
+    #             "nice": cpu_times.nice,
+    #             "iowait": cpu_times.iowait,
+    #             "irq": cpu_times.irq,
+    #             "softirq": cpu_times.softirq,
+    #             "steal": cpu_times.steal,
+    #             "guest": cpu_times.guest,
+    #             "guest_nice": cpu_times.guest_nice,
+    #         }
+    #     )
 
-    if psutil.LINUX:
-        usage["cpu_times"].update(
-            {
-                "nice": psutil.cpu_times().nice,
-                "iowait": psutil.cpu_times().iowait,
-                "irq": psutil.cpu_times().irq,
-                "softirq": psutil.cpu_times().softirq,
-                "steal": psutil.cpu_times().steal,
-                "guest": psutil.cpu_times().guest,
-                "guest_nice": psutil.cpu_times().guest_nice,
-            }
-        )
+    # Try to get CPU temperature (if supported)
+    try:
+        temps = psutil.sensors_temperatures()
+        if "coretemp" in temps:
+            metrics["cpu_temperature"] = temps["coretemp"][
+                0
+            ].current  # Get the first sensor value
+    except AttributeError:
+        metrics["cpu_temperature"] = "Unavailable"
 
-    return usage
+    return metrics
